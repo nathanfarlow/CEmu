@@ -1299,6 +1299,10 @@ void MainWindow::closeEvent(QCloseEvent *e) {
             debugToggle();
         }
 
+        if (guiDebugBasic) {
+            debugBasicToggle();
+        }
+
         if (guiReceive) {
             varToggle();
         }
@@ -2206,6 +2210,9 @@ void MainWindow::resetEmu() {
     if (guiDebug) {
         debugToggle();
     }
+    if (guiDebugBasic) {
+        debugBasicToggle();
+    }
 
     emu.reset();
 }
@@ -2261,6 +2268,9 @@ void MainWindow::emuLoad(emu_data_t type) {
     }
     if (guiDebug) {
         debugToggle();
+    }
+    if (guiDebugBasic) {
+        debugBasicToggle();
     }
 
     switch (type) {
