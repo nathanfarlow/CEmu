@@ -80,6 +80,7 @@ namespace autotester
 
     std::vector<std::string> globVector(const std::string& pattern);
 
+    bool sendFileSynchronously(const std::string& file, int location);
     bool sendFilesForTest();
 
     bool doTestSequence();

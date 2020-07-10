@@ -648,6 +648,37 @@ std::vector<std::string> globVector(const std::string& pattern)
     return files;
 }
 
+bool sendFileSynchronously(const std::string& file, int location)
+{
+    constexpr int kDone = 1, kSuccess = 1 << 1;
+
+    const char *filePtr = file.c_str();
+    
+    int status = 0;
+
+    auto progressHandler = [](void *context, int value, int total) -> bool
+    {
+        const bool done = !total || value == total;
+        const bool success = total && value == total;
+
+        *(int *)context = (success << 1) | done;
+
+        return true;
+    };
+
+    if (cemucore::emu_send_variables(&filePtr, 1, location, progressHandler, &status) != cemucore::LINK_GOOD)
+    {
+        return false;
+    }
+
+    while (!(status & kDone))
+    {
+        cemucore::emu_run(50);
+    }
+
+    return status & kSuccess;
+}
+
 bool sendFilesForTest()
 {
     std::vector<std::string> forced_files;
@@ -681,7 +712,7 @@ bool sendFilesForTest()
             {
                 std::cout << "- Sending forced file " << file << "... ";
             }
-            if (cemucore::emu_send_variable(file.c_str(), cemucore::LINK_FILE) != cemucore::LINK_GOOD)
+            if (!sendFileSynchronously(file, cemucore::LINK_FILE))
             {
                 if (debugMode)
                 {
@@ -703,7 +734,7 @@ bool sendFilesForTest()
         {
             std::cout << "- Sending file " << file << "... ";
         }
-        if (cemucore::emu_send_variable(file.c_str(), cemucore::LINK_FILE) != cemucore::LINK_GOOD)
+        if (!sendFileSynchronously(file, cemucore::LINK_FILE))
         {
             if (debugMode)
             {
